@@ -11,7 +11,7 @@ app.use(express.raw({ type: "application/vnd.custom-type" }));
 app.use(express.text({ type: "text/html" }));
 
 app.get("/todos", async (req, res) => {
-  const todos = await prisma.todo.findMany({
+  const todos = await prisma.pessoa.findMany({
     orderBy: { createdAt: "desc" },
   });
 
@@ -20,7 +20,7 @@ app.get("/todos", async (req, res) => {
 
 app.post("/todos", async (req, res) => {
   const { nome, status } = req.body;
-  const todo = await prisma.todo.create({
+  const todo = await prisma.pessoa.create({
     data: {
       nome,
       createdAt: new Date(),
@@ -32,8 +32,8 @@ app.post("/todos", async (req, res) => {
 });
 
 app.get("/todos/:id", async (req, res) => {
-  const id = req.params.id;
-  const todo = await prisma.todo.findUnique({
+  const { id } = req.body;
+  const todo = await prisma.pessoa.findUnique({
     where: { id },
   });
 
@@ -41,8 +41,8 @@ app.get("/todos/:id", async (req, res) => {
 });
 
 app.put("/todos/:id", async (req, res) => {
-  const id = req.params.id;
-  const todo = await prisma.todo.update({
+  const { id } = req.body;
+  const todo = await prisma.pessoa.update({
     where: { id },
     data: req.body,
   });
@@ -51,8 +51,8 @@ app.put("/todos/:id", async (req, res) => {
 });
 
 app.delete("/todos/:id", async (req, res) => {
-  const id = req.params.id;
-  await prisma.todo.delete({
+  const { id } = req.body;
+  await prisma.pessoa.delete({
     where: { id },
   });
 

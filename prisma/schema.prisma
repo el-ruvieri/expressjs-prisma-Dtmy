@@ -10,8 +10,8 @@ generator client {
   provider = "prisma-client-js"
 }
 
-model Todo {
-  id        String   @id @default(uuid())
+model Pessoa {
+  id        Int   @id @default(autoincrement())
   createdAt DateTime @default(now())
   nome      String
   status Boolean @default(true)
