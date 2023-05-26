@@ -1,34 +1,49 @@
 import { PrismaClient } from "@prisma/client";
+import { json } from "body-parser";
 import express from "express";
+import redis from "./lib/cache";
 
 const prisma = new PrismaClient();
 
 const app = express();
 const port = process.env.PORT || 3000;
+const cacheKey = "pessoa:all";
 
 app.use(express.json());
 app.use(express.raw({ type: "application/vnd.custom-type" }));
 app.use(express.text({ type: "text/html" }));
 
 app.get("/todos", async (req, res) => {
-  const todos = await prisma.pessoa.findMany({
-    orderBy: { createdAt: "desc" },
-  });
-
-  res.json(todos);
+  try {
+    const cachePessoa = await redis.get(cacheKey);
+    if (cachePessoa) {
+      return res.json(JSON.parse(cachePessoa));
+    }
+    const todos = await prisma.pessoa.findMany({
+      orderBy: { createdAt: "desc" },
+    });
+    await redis.set(cacheKey, JSON.stringify(todos));
+    return res.json(todos);
+  } catch (e) {
+    return res.json({ error: e });
+  }
 });
 
 app.post("/todos", async (req, res) => {
   const { nome, status } = req.body;
-  const todo = await prisma.pessoa.create({
-    data: {
-      nome,
-      createdAt: new Date(),
-      status,
-    },
-  });
-
-  return res.json(todo);
+  try {
+    const todo = await prisma.pessoa.create({
+      data: {
+        nome,
+        createdAt: new Date(),
+        status,
+      },
+    });
+    await redis.del(cacheKey);
+    return res.json(todo);
+  } catch (e) {
+    return res.json({ error: e });
+  }
 });
 
 app.get("/todos", async (req, res) => {
