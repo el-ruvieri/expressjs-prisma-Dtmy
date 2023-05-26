@@ -12,18 +12,19 @@ app.use(express.text({ type: "text/html" }));
 
 app.get("/todos", async (req, res) => {
   const todos = await prisma.todo.findMany({
-    orderBy: { createdAt: "desc" }, 
+    orderBy: { createdAt: "desc" },
   });
 
   res.json(todos);
 });
 
 app.post("/todos", async (req, res) => {
+  const { nome, status } = req.body;
   const todo = await prisma.todo.create({
     data: {
-      completed: false,
+      nome,
       createdAt: new Date(),
-      text: req.body.text ?? "Empty todo",
+      status,
     },
   });
 
@@ -67,10 +68,10 @@ app.get("/", async (req, res) => {
     GET, POST /todos
     GET, PUT, DELETE /todos/:id
   </pre>
-  `.trim(),
+  `.trim()
   );
 });
 
 app.listen(Number(port), "0.0.0.0", () => {
-    console.log(`Example app listening at http://localhost:${port}`);
+  console.log(`Example app listening at http://localhost:${port}`);
 });
